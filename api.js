@@ -5,12 +5,15 @@ const fs = require("fs");
 const path = require("path");
 const app = express();
 
+app.use(express.static(path.join(__dirname, 'src')));
+
 app.get("/get-data-files", (req, res) => {
   const dataDir = path.join(__dirname, "data");
   fs.readdir(dataDir, (err, files) => {
     if (err) {
       return res.status(500).send("Unable to scan directory");
     }
+    
     // Filter for JSON files and return the list
     const jsonFiles = files.filter((file) => file.endsWith(".js"));
     res.json(jsonFiles);

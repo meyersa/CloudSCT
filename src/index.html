@@ -21,60 +21,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
-    <!--Leaflet Time-Slider module js adapted from Brian Geyer (https://github.com/geyerbri) with thanks; find maintained version at https://github.com/geyerbri/LeafletSlider-->
-    <script src="js/SliderControl.js"></script>
   </head>
-  <body id="page-top">
-    <!-- Map-->
-    <section class="map-section text-center">
-      <div id="map" style="height: 800px"></div>
-      <script>
-        var map = L.map("map", { minZoom: 4, maxZoom: 10, scrollWheelZoom: false }).setView([37.09024, -95.712891], 5);
-        var light = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-          attribution:
-            '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>',
-        }).addTo(map);
-        // change icon
-        var myicon = L.icon({
-          iconUrl: "./assets/img/pin.svg",
-          iconSize: [20, 40],
-        });
-        // define optionsObject
-        var optionsObject = {
-          onEachFeature: onEachFeature,
-          pointToLayer: function (feature, latlng) {
-            return L.marker(latlng, { icon: myicon });
-          },
-        };
-        // define onEachFeature
-        function onEachFeature(feature, layer) {
-          var content =
-            "<div style='clear: both'></div><div><h5>" +
-            feature.properties.title +
-            "</h5><p>" +
-            feature.properties.description +
-            " <a href=" +
-            feature.properties.link +
-            " target='_blank'>Read more</a></p></div>";
-          layer.bindPopup(content, { closeButton: true });
-        }
-        // map data
-        $.getJSON("http://localhost:3000/get-data-file?filename=data202201.js", function (json) {
-          var group1 = L.geoJSON(json, optionsObject);
-
-          group1.options.time = "2022.01";
-
-          var multiLayers = L.layerGroup([group1]);
-          var sliderControl1 = L.control.sliderControl({
-            layer: multiLayers,
-            alwaysShowDate: true,
-            showAllPopups: false,
-            showPopups: false,
-          });
-          map.addControl(sliderControl1);
-          sliderControl1.startSlider();
-        });
-      </script>
-    </section>
+  <body>
+    <div id="text">
+      <h1>Cloud SCTracker</h1>
+      <p>
+        Aliqua aute nisi ad occaecat quis quis voluptate ex in incididunt elit sit ad. Veniam sint aute nulla mollit
+        ullamco qui tempor. Dolore dolore ut consectetur irure id minim Lorem. Eu Lorem enim laborum proident. Ut aute
+        minim consequat et nisi aliqua. Occaecat exercitation occaecat do do aliquip duis laboris eu eu est ipsum.
+        Fugiat in deserunt cupidatat veniam occaecat veniam nostrud ex. Excepteur nisi non officia adipisicing veniam in
+        eiusmod ex ipsum. Qui deserunt dolore quis esse nostrud deserunt. Pariatur officia id velit ea nostrud officia
+        cillum exercitation. In aliquip cillum consectetur dolore aliqua dolor veniam et aute nostrud adipisicing enim.
+      </p>
+    </div>
+    <div id="map"></div>
+    <script src="js/map-script.js"></script>
   </body>
 </html>

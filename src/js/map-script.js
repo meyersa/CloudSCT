@@ -1,3 +1,57 @@
+var map = L.map("map", { minZoom: 4, maxZoom: 10, scrollWheelZoom: false }).setView([37.09024, -95.712891], 5);
+var light = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+  attribution:
+    '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>',
+}).addTo(map);
+
+// change icon
+var myicon = L.icon({
+  iconUrl: "./assets/img/pin.svg",
+  iconSize: [20, 40],
+});
+
+// Fetch the list of available data files from the server
+$.getJSON("/get-data-files", function (dataFiles) {
+  console.log("Available data files:", dataFiles);
+
+  // For this example, we'll use the first file in the list
+  var firstDataFile = dataFiles[0];
+
+  // Fetch the data file content dynamically
+  $.getJSON("/get-data-file?filename=" + firstDataFile, function (json) {
+    var group1 = L.geoJSON(json, {
+      onEachFeature: onEachFeature,
+      pointToLayer: function (feature, latlng) {
+        return L.marker(latlng, { icon: myicon });
+      },
+    });
+
+    group1.options.time = "2022.01";
+    var multiLayers = L.layerGroup([group1]);
+    var sliderControl1 = L.control.sliderControl({
+      layer: multiLayers,
+      alwaysShowDate: true,
+      showAllPopups: false,
+      showPopups: false,
+    });
+    map.addControl(sliderControl1);
+    sliderControl1.startSlider();
+  });
+});
+
+// Define the onEachFeature function
+function onEachFeature(feature, layer) {
+  var content =
+    "<div style='clear: both'></div><div><h5>" +
+    feature.properties.title +
+    "</h5><p>" +
+    feature.properties.description +
+    " <a href=" +
+    feature.properties.link +
+    " target='_blank'>Read more</a></p></div>";
+  layer.bindPopup(content, { closeButton: true });
+}
+
 L.Control.SliderControl = L.Control.extend({
     options: {
         position: 'topright',
