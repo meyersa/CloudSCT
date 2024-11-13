@@ -3,16 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="" />
-    <meta name="author" content="" />
     <title>Cloud SCTracker</title>
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
     <script src="https://use.fontawesome.com/releases/v5.15.4/js/all.js" crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet" />
-    <link
-      href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-      rel="stylesheet"
-    />
     <link href="css/styles.css" rel="stylesheet" />
     <script
       src="https://code.jquery.com/jquery-3.5.1.js"
@@ -32,81 +25,6 @@
     <script src="js/SliderControl.js"></script>
   </head>
   <body id="page-top">
-    <!-- Navigation-->
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
-      <div class="container px-4 px-lg-5">
-        <a class="navbar-brand" href="#page-top">Cloud SCTracker</a>
-        <button
-          class="navbar-toggler navbar-toggler-right"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarResponsive"
-          aria-controls="navbarResponsive"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          Menu
-          <i class="fas fa-bars"></i>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarResponsive">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="#about"><b>About</b></a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#map"><b>Map</b></a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#data"><b>Data</b></a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#contact"><b>Contact</b></a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-    <!-- Masthead-->
-    <header class="masthead">
-      <div class="container px-4 px-lg-5 d-flex h-100 align-items-center justify-content-center">
-        <div class="d-flex justify-content-center">
-          <div class="text-center">
-            <h1 class="mx-auto my-0 text-uppercase"><b>Cloud SCTracker</b></h1>
-            <h2 class="text-white-58 mx-auto mt-2 mb-5">A living archive of smart city prevalence</h2>
-            <a class="btn btn-primary" href="#about">More</a>
-          </div>
-        </div>
-      </div>
-    </header>
-    <!-- About-->
-    <section class="about-section text-center" id="about">
-      <div class="container px-4 px-lg-5">
-        <div class="row gx-4 gx-lg-5 justify-content-center">
-          <div class="col-lg-10">
-            <h2 class="text-white mb-5">Where are the smart cities?</h2>
-            <p class="text-white-80 mb-3" align="left">
-              Smart cities are municipal entities that incorporate information and communications technologies into city
-              management. Though they are gaining in popularity, where are they actually being launched?
-            </p>
-            <p class="text-white-80 mb-3" align="left">
-              Smart City Tracker is a web-based and open-source platform where you can track and explore local
-              governments’ smart city implementation in the United States. It uses Google Custom Search API to
-              systematically search the official websites of 322 cities with a population of more than 100,000. If a
-              city mentions “smart city” on its website, Smart City Tracker drops a pin at its corresponding location.
-              So, Smart City Tracker simply maps out which cities are talking about being smart. The map and datasets
-              are updated monthly starting from January 2022 and serve as a living archive of smart city prevalence.
-            </p>
-            <p class="text-white-80 mb-3" align="left">
-              You can drag the slider on the top right of the map to see search results at different times and click on
-              a pin to read more about what a city says. The links in the popups will take you to the city webpages
-              where the smart city concept is being discussed.
-            </p>
-            <br />
-            <br />
-          </div>
-        </div>
-      </div>
-    </section>
     <!-- Map-->
     <section class="map-section text-center">
       <div id="map" style="height: 800px"></div>
@@ -141,7 +59,7 @@
           layer.bindPopup(content, { closeButton: true });
         }
         // map data
-        $.getJSON("./assets/data/data202201.js", function (json) {
+        $.getJSON("http://localhost:3000/get-data-file?filename=data202201.js", function (json) {
           var group1 = L.geoJSON(json, optionsObject);
 
           group1.options.time = "2022.01";
@@ -158,74 +76,5 @@
         });
       </script>
     </section>
-    <!-- Data-->
-    <section class="data-section bg-mine text-center" id="data">
-      <div class="container px-4 px-lg-5">
-        <div class="row gx-4 gx-lg-5 justify-content-center">
-          <div class="col-lg-10">
-            <h2 class="text-white mb-4">Data</h2>
-            <p class="text-white-80 mb-3">
-              You can download the data in JSON format
-              <a href="https://github.com/caimeng2/SmartCityTracker/tree/master/assets/data" target="_blank">here</a>
-              and use it for your own project.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-    <!-- Contact-->
-    <section class="contact-section bg-mine text-center" id="contact">
-      <div class="container px-4 px-lg-5">
-        <div class="row gx-4 gx-lg-5 justify-content-center">
-          <div class="col-lg-10">
-            <h2 class="text-white mb-4">Contact</h2>
-            <p class="text-white-80 mb-3" align="left">
-              This site was modified by August Meyers for a class project to be disaggregated and cloud database backed
-            </p>
-            <p class="text-white-80 mb-3" align="left">
-              This site was originally built by Meng Cai, PhD candidate at
-              <a href="https://www.canr.msu.edu/people/meng-cai?profileDisplayContent=contactInfo" target="_blank"
-                >Michigan State Univeristy</a
-              >, as part of the
-              <a href="https://chi.anthropology.msu.edu/fellowships/" target="_blank"
-                >Cultural Heritage Informatics Fellowship</a
-              >. Meng can be reached at mengcai24601 at gmail dot com.
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="social d-flex justify-content-center">
-        <a class="mx-2" href="https://github.com/meyersa/itc630-SmartCityTracker" target="_blank"
-          ><i class="fab fa-github"></i
-        ></a>
-      </div>
-    </section>
-    <!-- Footer-->
-    <footer class="footer bg-mine small text-center text-white-50">
-      <div class="container px-4 px-lg-5">Copyright &copy; Meng Cai 2024</div>
-      <div class="container px-4 px-lg-5">
-        <a href="https://doi.org/10.5281/zenodo.7670784"
-          ><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.7670784.svg" alt="DOI"
-        /></a>
-      </div>
-      <div class="container px-4 px-lg-5">
-        <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"
-          ><img
-            alt="Creative Commons License"
-            style="border-width: 0"
-            src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png"
-            target="_blank"
-        /></a>
-        This work is licensed under a
-        <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank"
-          >Creative Commons Attribution-ShareAlike 4.0 International License</a
-        >.
-      </div>
-    </footer>
-    <!-- Bootstrap core JS-->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Core theme JS-->
-    <script src="js/scripts.js"></script>
-    <script src="https://cdn.startbootstrap.com/sb-forms-latest.js"></script>
   </body>
 </html>
