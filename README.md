@@ -1,9 +1,16 @@
-# [Smart City Tracker](https://caimeng2.github.io/SmartCityTracker/)
+# Cloud Implementation of [Smart City Tracker](https://caimeng2.github.io/SmartCityTracker/)
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7670784.svg)](https://doi.org/10.5281/zenodo.7670784)
+This project serves as an ITC630 project to disaggregate an existing project into microservices that are cloud ready. Smart City Tracker currently exists as a web service that aggregates data from JSON files into a usable display 
 
-Smart City Tracker is an interactive platform where users can track and explore local governments’ smart city implementation in the United States.
+# Implementation 
+The bulk of this project is breaking the existing service into a frontend and backend. 
 
-The dataset has been updated monthly starting from January 2022.
+## Frontend
+Converting to a Dockerfile that reads data from a remote database 
 
-Cite as: Cai, Meng. (2023). Smart City Tracker: A living archive of smart city prevalence (v1.0) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.7670784
+## Backend
+Upload data to a cloud database
+
+# Original
+Cai, Meng. (2023). Smart City Tracker: A living archive of smart city prevalence (v1.0) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.7670784
+
