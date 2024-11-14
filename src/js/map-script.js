@@ -1,395 +1,90 @@
-var map = L.map("map", { minZoom: 4, maxZoom: 10, scrollWheelZoom: false }).setView([37.09024, -95.712891], 3);
+var map = L.map("map", { minZoom: 4, maxZoom: 10, scrollWheelZoom: false }).setView([37.09024, -95.712891], 5);
 var light = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
   attribution:
     '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>',
 }).addTo(map);
 
-// change icon
-var myicon = L.divIcon({
-  html: '<i class="fa-solid fa-location-pin" style="color: #ff4d4d;"></i>',
-  iconSize: [40, 40],
-  className: "mapIcon",
+// Layer to hold current markers
+var currentGeoJSONLayer = null;
+
+var customIcon = L.divIcon({
+  className: "leaflet-div-icon",
+  html: '<i class="fa-solid fa-location-pin" style="color: #ff4d4d; font-size: 24px;"></i>',
+  iconSize: [24, 24],
+  iconAnchor: [12, 24],
+  popupAnchor: [0, -24],
 });
 
-// Fetch the list of available data files from the server
-$.getJSON("/get-data-files", function (dataFiles) {
-  console.log("Available data files:", dataFiles);
+// Function to load GeoJSON data from the endpoint
+function loadGeoJSONData(filename) {
+  fetch(`/get-data-file?filename=${filename}`)
+    .then((response) => response.json())
+    .then((data) => {
+      if (currentGeoJSONLayer) {
+        map.removeLayer(currentGeoJSONLayer);
+      }
 
-  // For this example, we'll use the first file in the list
-  var firstDataFile = dataFiles[0];
-
-  // Fetch the data file content dynamically
-  $.getJSON("/get-data-file?filename=" + firstDataFile, function (json) {
-    var group1 = L.geoJSON(json, {
-      onEachFeature: onEachFeature,
-      pointToLayer: function (feature, latlng) {
-        return L.marker(latlng, { icon: myicon });
-      },
-    });
-
-    group1.options.time = "2022.01";
-    var multiLayers = L.layerGroup([group1]);
-    var sliderControl1 = L.control.sliderControl({
-      layer: multiLayers,
-      alwaysShowDate: true,
-      showAllPopups: false,
-      showPopups: false,
-    });
-    map.addControl(sliderControl1);
-    sliderControl1.startSlider();
-  });
-});
-
-// Define the onEachFeature function
-function onEachFeature(feature, layer) {
-  var content =
-    "<div style='clear: both'></div><div><h5>" +
-    feature.properties.title +
-    "</h5><p>" +
-    feature.properties.description +
-    " <a href=" +
-    feature.properties.link +
-    " target='_blank'>Read more</a></p></div>";
-  layer.bindPopup(content, { closeButton: true });
+      // Add new GeoJSON layer
+      currentGeoJSONLayer = L.geoJSON(data, {
+        // Add icon
+        pointToLayer: function (feature, latlng) {
+          return L.marker(latlng, { icon: customIcon });
+        },
+        // Add popup
+        onEachFeature: function (feature, layer) {
+          layer.bindPopup(`
+                <h3>${feature.properties.title}</h3>
+                <p>${feature.properties.description}</p>
+                <a href="${feature.properties.link}" target="_blank">Read more</a>
+              `);
+        },
+      }).addTo(map);
+    })
+    .catch((error) => console.error("Error loading GeoJSON data:", error));
 }
 
-L.Control.SliderControl = L.Control.extend({
-  options: {
-    position: "topright",
-    layer: null,
-    timeAttribute: "time",
-    isEpoch: false, // whether the time attribute is seconds elapsed from epoch
-    startTimeIdx: 0, // where to start looking for a timestring
-    timeStrLength: 19, // the size of  yyyy-mm-dd hh:mm:ss - if millis are present this will be larger
-    maxValue: -1,
-    minValue: 0,
-    showAllOnStart: false,
-    markers: null,
-    range: false,
-    follow: 0,
-    sameDate: false,
-    alwaysShowDate: false,
-    rezoom: null,
-    orderMarkers: true,
-    orderDesc: false,
-    popupOptions: {},
-    popupContent: "",
-    showAllPopups: true,
-    showPopups: true,
-  },
+// Function to load available timestamps
+function loadTimestamps() {
+  fetch("/get-data-files")
+    .then((response) => response.json())
+    .then((timestamps) => {
+      createSlider(timestamps);
 
-  initialize: function (options) {
-    L.Util.setOptions(this, options);
-    this._layer = this.options.layer;
-    L.extend(this, L.Mixin.Events);
-  },
-
-  onAdd: function (map) {
-    this.options.map = map;
-    // Create a control sliderContainer with a jquery ui slider
-    this.container = L.DomUtil.create("div", "", this._container);
-    this.sliderBoxContainer = L.DomUtil.create("div", "slider", this.container);
-    var sliderContainer = L.DomUtil.create("div", "", this.sliderBoxContainer);
-    sliderContainer.id = "leaflet-slider";
-    sliderContainer.style.width = "200px";
-
-    L.DomUtil.create("div", "ui-slider-handle", sliderContainer);
-    this.timestampContainer = L.DomUtil.create("div", "slider", this.container);
-    this.timestampContainer.id = "slider-timestamp";
-    this.timestampContainer.style.cssText =
-      "width:200px; margin-top:3px; background-color:#FFFFFF; text-align:center; border-radius:5px;display:none;";
-
-    //Prevent map panning/zooming while using the slider
-    L.DomEvent.disableClickPropagation(this.sliderBoxContainer);
-    this._map.on("mouseup", this.clearTimestamp, this);
-
-    var options = this.options;
-    this.options.markers = [];
-
-    function compare(a, b) {
-      var valA = null;
-      var valB = null;
-
-      if (a.feature && a.feature.properties && a.feature.properties[options.timeAttribute]) {
-        valA = a.feature.properties[options.timeAttribute];
-      } else if (a.options[options.timeAttribute]) {
-        valA = a.options[options.timeAttribute];
+      // Load the first timestamp's data to display the initial layer
+      if (timestamps.length > 0) {
+        loadGeoJSONData(timestamps[0]); // Automatically load the first timestamp's data
       }
-      if (b.feature && b.feature.properties && b.feature.properties[options.timeAttribute]) {
-        valB = b.feature.properties[options.timeAttribute];
-      } else if (b.options[options.timeAttribute]) {
-        valB = b.options[options.timeAttribute];
-      }
-      if (valA && valB) {
-        if (valA < valB) {
-          return -1;
-        }
-        if (valA > valB) {
-          return 1;
-        }
-      }
-      return 0;
-    }
+    })
+    .catch((error) => console.error("Error loading timestamps:", error));
+}
 
-    //If a layer has been provided: calculate the min and max values for the slider
-    if (this._layer) {
-      var index_temp = 0;
-      var templayers = [];
-      this._layer.eachLayer(function (layer) {
-        templayers.push(layer);
-      });
+// Function to create the slider as a Leaflet control
+function createSlider(timestamps) {
+  // Create a custom control for the slider
+  var sliderControl = L.control({ position: "topright" });
 
-      if (options.orderMarkers) {
-        templayers = templayers.sort(compare);
+  // Add slider HTML to the custom control
+  sliderControl.onAdd = function () {
+    var sliderContainer = L.DomUtil.create("div", "leaflet-bar leaflet-control leaflet-control-slider");
+    var sliderElement = L.DomUtil.create("input", "");
 
-        if (options.orderDesc) {
-          templayers = templayers.reverse();
-        }
-      }
+    sliderElement.type = "range";
+    sliderElement.min = 0;
+    sliderElement.max = timestamps.length - 1;
+    sliderElement.step = 1;
 
-      var that = this;
-      templayers.forEach(function (layer) {
-        if (layer instanceof L.LayerGroup) {
-          layer.getLayers().forEach(function (l) {
-            l = that._setPopupProperty(l);
-          });
-        } else {
-          layer = that._setPopupProperty(layer);
-        }
-        options.markers[index_temp] = layer;
-
-        ++index_temp;
-      });
-
-      options.maxValue = index_temp - 1;
-      this.options = options;
-    } else {
-      console.log("Error: You have to specify a layer via new SliderControl({layer: your_layer});");
-    }
-    return this.container;
-  },
-
-  onRemove: function (map) {
-    //Delete all markers which where added via the slider and remove the slider div
-    for (i = this.options.minValue; i <= this.options.maxValue; i++) {
-      map.removeLayer(this.options.markers[i]);
-    }
-    this.container.remove();
-
-    map.off("mouseup", this.clearTimestamp, this);
-  },
-
-  startSlider: function () {
-    var _options = this.options;
-    var _extractTimestamp = this.extractTimestamp;
-    var index_start = _options.minValue;
-    if (_options.showAllOnStart) {
-      index_start = _options.maxValue;
-      if (_options.range) _options.values = [_options.minValue, _options.maxValue];
-      else _options.value = _options.maxValue;
-    }
-    var timestampContainer = this.timestampContainer;
-    var that = this;
-    $(this.sliderBoxContainer).slider({
-      range: _options.range,
-      value: _options.value,
-      values: _options.values,
-      min: _options.minValue,
-      max: _options.maxValue,
-      sameDate: _options.sameDate,
-      step: 1,
-      slide: function (e, ui) {
-        var map = _options.map;
-        var fg = L.featureGroup();
-        if (!!_options.markers[ui.value]) {
-          // If there is no time property, this line has to be removed (or exchanged with a different property)
-          if (_options.markers[ui.value].feature !== undefined) {
-            if (_options.markers[ui.value].feature.properties[_options.timeAttribute]) {
-              if (_options.markers[ui.value]) {
-                timestampContainer.style.display = "block";
-                $(timestampContainer).html(
-                  _extractTimestamp(_options.markers[ui.value].feature.properties[_options.timeAttribute], _options)
-                );
-              }
-            } else {
-              console.error("Time property " + _options.timeAttribute + " not found in data");
-            }
-          } else {
-            // set by leaflet Vector Layers
-            if (_options.markers[ui.value].options[_options.timeAttribute]) {
-              if (_options.markers[ui.value]) {
-                timestampContainer.style.display = "block";
-                $(timestampContainer).html(
-                  _extractTimestamp(_options.markers[ui.value].options[_options.timeAttribute], _options)
-                );
-              }
-            } else {
-              console.error("Time property " + _options.timeAttribute + " not found in data");
-            }
-          }
-          var markers = [];
-          var i;
-          // clear markers
-          for (i = _options.minValue; i <= _options.maxValue; i++) {
-            if (_options.markers[i]) map.removeLayer(_options.markers[i]);
-          }
-          if (_options.range) {
-            // jquery ui using range
-            for (i = ui.values[0]; i <= ui.values[1]; i++) {
-              if (_options.markers[i]) {
-                markers.push(_options.markers[i]);
-                map.addLayer(_options.markers[i]);
-                fg.addLayer(_options.markers[i]);
-              }
-            }
-          } else if (_options.follow > 0) {
-            for (i = ui.value - _options.follow + 1; i <= ui.value; i++) {
-              if (_options.markers[i]) {
-                markers.push(_options.markers[i]);
-                map.addLayer(_options.markers[i]);
-                fg.addLayer(_options.markers[i]);
-              }
-            }
-          } else if (_options.sameDate) {
-            var currentTime;
-            if (_options.markers[ui.value].feature !== undefined) {
-              currentTime = _options.markers[ui.value].feature.properties.time;
-            } else {
-              currentTime = _options.markers[ui.value].options.time;
-            }
-            for (i = _options.minValue; i <= _options.maxValue; i++) {
-              if (_options.markers[i].options.time == currentTime) {
-                markers.push(_options.markers[i]);
-                map.addLayer(_options.markers[i]);
-              }
-            }
-          } else {
-            for (i = _options.minValue; i <= ui.value; i++) {
-              if (_options.markers[i]) {
-                markers.push(_options.markers[i]);
-                map.addLayer(_options.markers[i]);
-                fg.addLayer(_options.markers[i]);
-              }
-            }
-          }
-
-          if (_options.showPopups) {
-            that._openPopups(markers);
-          }
-          that.fire("rangechanged", {
-            markers: markers,
-          });
-        }
-        if (_options.rezoom) {
-          map.fitBounds(fg.getBounds(), {
-            maxZoom: _options.rezoom,
-          });
-        }
-      },
+    sliderElement.addEventListener("input", function () {
+      var timestamp = timestamps[sliderElement.value];
+      loadGeoJSONData(timestamp);
     });
-    if (_options.alwaysShowDate) {
-      timestampContainer.style.display = "block";
 
-      if (_options.markers[index_start].feature !== undefined) {
-        if (_options.markers[index_start].feature.properties[_options.timeAttribute]) {
-          if (_options.markers[index_start]) {
-            timestampContainer.style.display = "block";
-            $(timestampContainer).html(
-              _extractTimestamp(_options.markers[index_start].feature.properties[_options.timeAttribute], _options)
-            );
-          }
-        } else {
-          console.error("Time property " + _options.timeAttribute + " not found in data");
-        }
-      } else {
-        // set by leaflet Vector Layers
-        if (_options.markers[index_start].options[_options.timeAttribute]) {
-          if (_options.markers[index_start]) {
-            timestampContainer.style.display = "block";
-            $(timestampContainer).html(
-              _extractTimestamp(_options.markers[index_start].options[_options.timeAttribute], _options)
-            );
-          }
-        } else {
-          console.error("Time property " + _options.timeAttribute + " not found in data");
-        }
-      }
-    }
-    var markers = [];
-    for (i = _options.minValue; i <= index_start; i++) {
-      markers.push(_options.markers[i]);
-      _options.map.addLayer(_options.markers[i]);
-    }
-    if (_options.showPopups) {
-      this._openPopups(markers);
-    }
-    this.fire("rangechanged", {
-      markers: markers,
-    });
-  },
-  clearTimestamp: function () {
-    //Hide the slider timestamp if not range and option alwaysShowDate is set on false
-    if (!this.options.alwaysShowDate) {
-      this.timestampContainer.innerHTML = "";
-      this.timestampContainer.style.display = "none";
-    }
-  },
+    sliderContainer.appendChild(sliderElement);
+    return sliderContainer;
+  };
 
-  extractTimestamp: function (time, options) {
-    if (options.isEpoch) {
-      time = new Date(parseInt(time)).toString(); // this is local time
-    }
-    return time.substr(options.startTimeIdx, options.startTimeIdx + options.timeStrLength);
-  },
+  // Add the control to the map
+  sliderControl.addTo(map);
+}
 
-  setPosition: function (position) {
-    var map = this._map;
-
-    if (map) {
-      map.removeControl(this);
-    }
-
-    this.options.position = position;
-
-    if (map) {
-      map.addControl(this);
-    }
-    this.startSlider();
-    return this;
-  },
-
-  _setPopupProperty: function (marker) {
-    if (marker._popup) {
-      marker._orgpopup = marker._popup;
-    }
-    return marker;
-  },
-
-  _openPopups: function (markers) {
-    var options = this.options;
-    var that = this;
-    markers.forEach(function (marker) {
-      if (marker instanceof L.LayerGroup) {
-        that._openPopups(marker.getLayers());
-      } else {
-        if (marker._orgpopup) {
-          marker._popup = marker._orgpopup;
-          if (options.showAllPopups) {
-            marker._popup.options.autoClose = false;
-          }
-          marker.openPopup();
-        } else if (options.popupContent) {
-          var popupOptions = options.popupOptions;
-          if (options.showAllPopups) {
-            popupOptions.autoClose = false;
-          }
-          marker.bindPopup(options.popupContent, popupOptions).openPopup();
-        }
-      }
-    });
-  },
-});
-
-L.control.sliderControl = function (options) {
-  return new L.Control.SliderControl(options);
-};
+// Load available timestamps and set up the slider
+loadTimestamps();

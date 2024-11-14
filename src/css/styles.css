@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Doto:wght@100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Doto:wght@100..900&display=swap");
 
 body {
   display: flex;
@@ -24,7 +24,7 @@ h5 {
 
 .red {
   color: rgb(255, 77, 77);
-  font-family: 'Doto', system-ui;
+  font-family: "Doto", system-ui;
   font-weight: bolder;
 }
 
@@ -34,7 +34,6 @@ h5 {
   display: flex;
   flex-direction: column;
   flex-basis: 30%;
-
 }
 
 .title {
@@ -47,7 +46,6 @@ h5 {
 .content {
   flex-grow: 1;
   overflow: scroll;
-
 }
 
 .item > p {
@@ -63,12 +61,11 @@ h5 {
 }
 
 .item i {
-  margin-left: .5rem;
+  margin-left: 0.5rem;
 }
 
 .item > h2:hover {
-  box-shadow: .25rem .25rem rgb(255, 77, 77);
-
+  box-shadow: 0.25rem 0.25rem rgb(255, 77, 77);
 }
 
 #map {
@@ -89,6 +86,12 @@ h5 {
 .rotate {
   transform: rotate(180deg);
   transition: transform 0.5s ease;
+}
+
+.leaflet-marker-icon.leaflet-div-icon.leaflet-zoom-animated.leaflet-interactive {
+  background-color: transparent;
+  border: none;
+  text-align: center;
 }
 
 @media (max-width: 740px) {
