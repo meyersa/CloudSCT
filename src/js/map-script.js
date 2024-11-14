@@ -1,4 +1,4 @@
-var map = L.map("map", { minZoom: 4, maxZoom: 10, scrollWheelZoom: false }).setView([37.09024, -95.712891], 5);
+var map = L.map("map", { minZoom: 4, maxZoom: 10, scrollWheelZoom: false }).setView([37.09024, -95.712891], 3);
 var light = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
   attribution:
     '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>',
@@ -9,7 +9,7 @@ var currentGeoJSONLayer = null;
 
 var customIcon = L.divIcon({
   className: "leaflet-div-icon",
-  html: '<i class="fa-solid fa-location-pin" style="color: #ff4d4d; font-size: 24px;"></i>',
+  html: '<i class="fa-solid fa-map-pin" style="color: #ff4d4d; font-size: 24px;"></i>',
   iconSize: [24, 24],
   iconAnchor: [12, 24],
   popupAnchor: [0, -24],
