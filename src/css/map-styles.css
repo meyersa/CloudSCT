@@ -1,0 +1,42 @@
+.leaflet-marker-icon.leaflet-div-icon.leaflet-zoom-animated.leaflet-interactive {
+  background-color: transparent;
+  border: none;
+  text-align: center;
+}
+
+.leaflet-bar.leaflet-control.leaflet-control-slider {
+  width: 15rem;
+  height: 4rem;
+  text-align: center;
+  background-color: white;
+}
+
+.leaflet-bar.leaflet-control.leaflet-control-slider > input[type="range"] {
+  height: 2rem;
+  width: 90%;
+  margin: 0;
+  -webkit-appearance: none;
+
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 0.5rem;
+  backdrop-filter: contrast(0.8);
+  border: none;
+  border-radius: 1rem;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  border: none;
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: rgb(255, 77, 77);
+  margin-top: -4px;
+}
+
+.time-label {
+  margin: 0; 
+  
+}

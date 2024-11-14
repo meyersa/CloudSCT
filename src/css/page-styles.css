@@ -88,12 +88,6 @@ h5 {
   transition: transform 0.5s ease;
 }
 
-.leaflet-marker-icon.leaflet-div-icon.leaflet-zoom-animated.leaflet-interactive {
-  background-color: transparent;
-  border: none;
-  text-align: center;
-}
-
 @media (max-width: 740px) {
   body {
     flex-direction: column;
