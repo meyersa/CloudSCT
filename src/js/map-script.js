@@ -67,23 +67,39 @@ function createSlider(timestamps) {
   sliderControl.onAdd = function () {
     var sliderContainer = L.DomUtil.create("div", "leaflet-bar leaflet-control leaflet-control-slider");
     var sliderElement = L.DomUtil.create("input", "");
+    var timeLabel = L.DomUtil.create("h3", "time-label");
 
     sliderElement.type = "range";
     sliderElement.min = 0;
     sliderElement.max = timestamps.length - 1;
     sliderElement.step = 1;
 
+    updateTimeLabel(timeLabel, timestamps[timestamps.length - 1]);
+
     sliderElement.addEventListener("input", function () {
       var timestamp = timestamps[sliderElement.value];
       loadGeoJSONData(timestamp);
+      updateTimeLabel(timeLabel, timestamp);
     });
 
     sliderContainer.appendChild(sliderElement);
+    sliderContainer.appendChild(timeLabel);
+
     return sliderContainer;
   };
 
   // Add the control to the map
   sliderControl.addTo(map);
+}
+
+// Function to update the time label on the map
+function updateTimeLabel(timeLabel, timestamp) {
+  timeMatch = timestamp.match(new RegExp("data([0-9]{4})([0-9]{2}).js"));
+  timeParsed = `${timeMatch[1]}-${timeMatch[2]}`;
+
+  if (timeLabel) {
+    timeLabel.innerHTML = timeParsed; // Display the timestamp as time (you can format this further if needed)
+  }
 }
 
 // Load available timestamps and set up the slider
