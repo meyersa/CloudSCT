@@ -48,7 +48,7 @@ h5 {
   overflow: scroll;
 }
 
-.item > p {
+.item-content {
   display: none;
   padding: 0 1rem;
 }
@@ -64,8 +64,8 @@ h5 {
   margin-left: 0.5rem;
 }
 
-.item > h2:hover {
-  box-shadow: 0.25rem 0.25rem rgb(255, 77, 77);
+.item > h2:hover, .footer > a:hover {
+  box-shadow: 0rem 0.25rem rgb(255, 77, 77);
 }
 
 #map {
@@ -81,6 +81,11 @@ h5 {
   margin: 0 auto;
   padding: 1rem;
   font-size: 1.5rem;
+
+}
+
+.footer > a {
+  padding: .25rem;
 }
 
 .rotate {
