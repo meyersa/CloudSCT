@@ -21,20 +21,70 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+      integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
   </head>
   <body>
     <div id="text">
-      <h1>Cloud SCTracker</h1>
-      <p>
-        Aliqua aute nisi ad occaecat quis quis voluptate ex in incididunt elit sit ad. Veniam sint aute nulla mollit
-        ullamco qui tempor. Dolore dolore ut consectetur irure id minim Lorem. Eu Lorem enim laborum proident. Ut aute
-        minim consequat et nisi aliqua. Occaecat exercitation occaecat do do aliquip duis laboris eu eu est ipsum.
-        Fugiat in deserunt cupidatat veniam occaecat veniam nostrud ex. Excepteur nisi non officia adipisicing veniam in
-        eiusmod ex ipsum. Qui deserunt dolore quis esse nostrud deserunt. Pariatur officia id velit ea nostrud officia
-        cillum exercitation. In aliquip cillum consectetur dolore aliqua dolor veniam et aute nostrud adipisicing enim.
-      </p>
+      <div class="title">
+        <h1>Cloud SCTracker</h1>
+        <p>A living archive of smart city prevalence</p>
+      </div>
+      <div class="content">
+        <div class="item">
+          <h2>Where are they? <i class="fa-solid fa-chevron-down"></i></h2>
+          <p>
+            Smart cities are municipal entities that incorporate information and communications technologies into city
+            management. Though they are gaining in popularity, where are they actually being launched? Smart City
+            Tracker is a web-based and open-source platform where you can track and explore local governments’ smart
+            city implementation in the United States. It uses Google Custom Search API to systematically search the
+            official websites of 322 cities with a population of more than 100,000. If a city mentions “smart city” on
+            its website, Smart City Tracker drops a pin at its corresponding location. So, Smart City Tracker simply
+            maps out which cities are talking about being smart. The map and datasets are updated monthly starting from
+            January 2022 and serve as a living archive of smart city prevalence. You can drag the slider on the top
+            right of the map to see search results at different times and click on a pin to read more about what a city
+            says. The links in the popups will take you to the city webpages where the smart city concept is being
+            discussed.
+          </p>
+        </div>
+        <div class="item">
+          <h2>Data <i class="fa-solid fa-chevron-down"></i></h2>
+          <p>
+            You can download the data in JSON format
+            <a href="https://github.com/caimeng2/SmartCityTracker/tree/master/assets/data" target="_blank">here</a> and
+            use it for your own project.
+          </p>
+        </div>
+        <div class="item">
+          <h2>Source<i class="fa-solid fa-chevron-down"></i></h2>
+          <p>
+            This site was originally built by Meng Cai, PhD candidate at Michigan State University. The original can be
+            found <a href="https://caimeng2.github.io/SmartCityTracker/">here</a>.
+          </p>
+        </div>
+        <div class="footer">
+          <a href="https://github.com/meyersa/itc630-SmartCityTracker"><i class="fa-brands fa-github"></i></a>
+          <a href="https://github.com/caimeng2/SmartCityTracker"><i class="fa-solid fa-code-fork"></i></a>
+        </div>
+      </div>
     </div>
     <div id="map"></div>
+    <script>
+      // Select all h2 elements within .item divs
+      document.querySelectorAll(".item h2").forEach((header) => {
+        // Add click event listener to each header
+        header.addEventListener("click", () => {
+          // Toggle the visibility of the next sibling <p> element
+          const paragraph = header.nextElementSibling;
+          paragraph.style.display = paragraph.style.display === "block" ? "none" : "block";
+        });
+      });
+    </script>
     <script src="js/map-script.js"></script>
   </body>
 </html>
