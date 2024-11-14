@@ -16,12 +16,14 @@
   width: 90%;
   margin: 0;
   -webkit-appearance: none;
+  -moz-appearance: none;    /* Firefox */
 
 }
 
 input[type="range"]::-webkit-slider-runnable-track {
   height: 0.5rem;
   backdrop-filter: contrast(0.8);
+  -webkit-backdrop-filter: contrast(0.8); /* Fallback for Safari */
   border: none;
   border-radius: 1rem;
 }
@@ -36,7 +38,26 @@ input[type="range"]::-webkit-slider-thumb {
   margin-top: -4px;
 }
 
+/* Firefox */
+input[type="range"]::-moz-range-track {
+  height: 0.5rem;
+  background-color: #ddd;
+  border-radius: 1rem;
+}
+
+input[type="range"]::-moz-range-thumb {
+  height: 16px;
+  width: 16px;
+  background: rgb(255, 77, 77);
+  border-radius: 50%;
+  border: none;
+}
+
 .time-label {
   margin: 0; 
   
+}
+
+#map:focus {
+  outline: none;
 }

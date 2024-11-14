@@ -72,6 +72,7 @@ function createSlider(timestamps) {
     sliderElement.type = "range";
     sliderElement.min = 0;
     sliderElement.max = timestamps.length - 1;
+    sliderElement.value = timestamps.length - 1;
     sliderElement.step = 1;
 
     updateTimeLabel(timeLabel, timestamps[timestamps.length - 1]);
