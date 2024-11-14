@@ -47,7 +47,7 @@ function loadGeoJSONData(filename) {
 function loadTimestamps() {
   fetch("/get-data-files")
     .then((response) => response.json())
-    .then((timestamps) => {
+    .then((timestamps) => {      
       createSlider(timestamps);
 
       // Load the first timestamp's data to display the initial layer
@@ -95,7 +95,7 @@ function createSlider(timestamps) {
 
 // Function to update the time label on the map
 function updateTimeLabel(timeLabel, timestamp) {
-  timeMatch = timestamp.match(new RegExp("data([0-9]{4})([0-9]{2}).js"));
+  timeMatch = timestamp.match(new RegExp("data([0-9]{4})([0-9]{2})"));
   timeParsed = `${timeMatch[1]}-${timeMatch[2]}`;
 
   if (timeLabel) {
