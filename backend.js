@@ -4,6 +4,17 @@ const path = require("path");
 const os = require("os");
 const unzipper = require("unzipper");
 
+const { initializeApp, cert } = require("firebase-admin/app");
+const { getFirestore } = require("firebase-admin/firestore");
+
+const serviceAccount = require("./auth.json");
+
+initializeApp({
+  credential: cert(serviceAccount),
+});
+
+const db = getFirestore();
+
 const zenodoRecordId = "7670784";
 const downloadUrl = `https://zenodo.org/api/records/${zenodoRecordId}`;
 
@@ -56,4 +67,35 @@ async function downloadZenodoFiles() {
   }
 }
 
+// Function to upload each file to Firestore
+async function uploadZenodoFiles() {
+  try {
+    // Read all files in the directory
+    const files = fs.readdirSync(targetDir);
+
+    // Process each file
+    for (const file of files) {
+
+      // Only process .js files
+      if (path.extname(file) === ".js") {
+        const filePath = path.join(targetDir, file);
+
+        // Read and parse the file contents as JSON
+        const fileContents = fs.readFileSync(filePath, "utf-8");
+        const jsonData = JSON.parse(fileContents);
+
+        // Use the filename (without extension) as the document key
+        const documentKey = path.basename(file, ".js");
+
+        // Upload data to Firestore
+        await db.collection("data").doc(documentKey).set(jsonData);
+        console.log(`Uploaded ${documentKey} to Firestore`);
+      }
+    }
+  } catch (error) {
+    console.error("Error uploading data:", error);
+  }
+}
+
 downloadZenodoFiles();
+uploadZenodoFiles();
