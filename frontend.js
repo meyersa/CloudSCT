@@ -1,38 +1,53 @@
-// Temporary API to serve /data file
-
 const express = require("express");
-const fs = require("fs");
 const path = require("path");
 const app = express();
+const { initializeApp, cert } = require("firebase-admin/app");
+const { getFirestore } = require("firebase-admin/firestore");
 
-app.use(express.static(path.join(__dirname, 'src')));
+const serviceAccount = require("./auth.json");
 
-app.get("/get-data-files", (req, res) => {
-  const dataDir = path.join(__dirname, "data");
-  fs.readdir(dataDir, (err, files) => {
-    if (err) {
-      return res.status(500).send("Unable to scan directory");
-    }
-    
-    // Filter for JSON files and return the list
-    const jsonFiles = files.filter((file) => file.endsWith(".js"));
-    res.json(jsonFiles);
-  });
+initializeApp({
+  credential: cert(serviceAccount),
 });
 
-app.get("/get-data-file", (req, res) => {
+const db = getFirestore();
+
+app.use(express.static(path.join(__dirname, "src")));
+
+app.get("/get-data-files", async (req, res) => {
+  console.log("Returning data files")
+
+  try {
+    const snapshot = await db.collection("data").get();
+    if (snapshot.empty) {
+      return res.status(404).json({ message: "No data found in Firestore" });
+    }
+
+    const files = snapshot.docs.map((doc) => doc.id);
+    res.json(files);
+  } catch (error) {
+    console.error("Error fetching documents:", error);
+    res.status(500).send("Error fetching data from Firestore");
+  }
+});
+
+app.get("/get-data-file", async (req, res) => {
+  console.log("Returning data file")
+
   const { filename } = req.query;
 
-  const dataDir = path.join(__dirname, "data");
-  const filePath = path.join(dataDir, filename);
+  try {
+    const docRef = db.collection("data").doc(filename);
+    const doc = await docRef.get();
 
-  console.log(filePath)
+    if (!doc.exists) {
+      return res.status(404).send("File not found in Firestore");
+    }
 
-  // Verify that the file exists and is within the data directory
-  if (fs.existsSync(filePath)) {
-    res.sendFile(filePath);
-  } else {
-    res.status(404).send("File not found");
+    res.json(doc.data());
+  } catch (error) {
+    console.error("Error fetching document:", error);
+    res.status(500).send("Error fetching data from Firestore");
   }
 });
 

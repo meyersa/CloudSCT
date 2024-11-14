@@ -2,6 +2,14 @@
 
 This project serves as an ITC630 project to disaggregate an existing project into microservices that are cloud ready. Smart City Tracker currently exists as a web service that aggregates data from JSON files into a usable display 
 
+# Using 
+Download a Google Cloud service account key file and name it "auth.json". This account should have project access as a Database User. 
+
+Install packages utilizing:
+
+> npm install
+
+
 # Implementation 
 The bulk of this project is breaking the existing service into a frontend and backend. 
 
