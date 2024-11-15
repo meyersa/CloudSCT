@@ -1,7 +1,6 @@
 # Example Docker Compose
 services:
   frontend:
-    name: CloudSCT-Frontend
     image: ghcr.io/meyersa/cloudsct-frontend
     container_name: cloudsct-frontend
     ports:
@@ -9,9 +8,8 @@ services:
     volumes:
       - ./auth.json:/auth.json
     restart: unless-stopped
-    
+
   backend:
-    name: CloudSCT-Backend
     image: ghcr.io/meyersa/cloudsct-backend
     container_name: cloudsct-backend
     volumes:
