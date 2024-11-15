@@ -2,6 +2,8 @@
 
 This project serves as an ITC630 project to disaggregate the original [Smart City Tracker](https://github.com/caimeng2/SmartCityTracker) into microservices that are cloud-ready. The **Smart City Tracker** previously existed as a web service that aggregated data from JSON files into a usable display. This project has been restructured into a more scalable system, with data pulled dynamically from Firestore instead of loading statically.
 
+![New UI](/pics/new.png)
+
 ## Key Features:
 - **Frontend**: Displays information about smart city implementations in the United States. It runs static content and fetches dynamic data from Firestore.
 - **Backend**: Syncs data from Zenodo (where the dataset is hosted) to Firestore, ensuring the system stays updated autonomously with only Zenodo needing to be updated for new data.
