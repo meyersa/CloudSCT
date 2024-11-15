@@ -1,0 +1,2 @@
+- Fix slider
+- Wrap container for both 

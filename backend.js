@@ -18,19 +18,22 @@ const db = getFirestore();
 const zenodoRecordId = "7670784";
 const downloadUrl = `https://zenodo.org/api/records/${zenodoRecordId}`;
 
-const targetDir = path.join(__dirname, "data");
 const tmpDir = path.join(os.tmpdir(), zenodoRecordId);
+const extractDir = path.join(tmpDir, "extracted");
 
+// Download the Zenodo files
 async function downloadZenodoFiles() {
   try {
-    // Create temporary and target directories if not exist
+    // Create temporary directory if not exist
     fs.mkdirSync(tmpDir, { recursive: true });
-    fs.mkdirSync(targetDir, { recursive: true });
 
     // Get files from Zenodo
     const response = await axios.get(downloadUrl);
     const zipFile = response.data.files?.find((file) => file.key.endsWith(".zip"));
-    if (!zipFile) return console.log("No zip file found in this record.");
+    if (!zipFile) {
+      console.log("No zip file found in this record.");
+      return null;
+    }
 
     // Download to tmp dir
     const zipPath = path.join(tmpDir, path.basename(zipFile.links.self));
@@ -46,39 +49,54 @@ async function downloadZenodoFiles() {
       fileResponse.data.pipe(writer).on("finish", resolve).on("error", reject);
     });
     console.log(`Downloaded ${zipPath}`);
-
-    // Extract only files in '/data' directory
-    fs.createReadStream(zipPath)
-      .pipe(unzipper.Parse())
-      .on("entry", (entry) => {
-        if (entry.path.includes("/data/") && entry.type === "File") {
-          // Copy to target dir
-          entry.pipe(fs.createWriteStream(path.join(targetDir, path.basename(entry.path))));
-          console.log(`Extracted ${entry.path}`);
-        } else {
-          // Skip
-          entry.autodrain();
-        }
-      })
-      .on("close", () => console.log("Finished extracting /data"))
-      .on("error", console.error);
+    return zipPath;
   } catch (error) {
-    console.error("Error:", error.message);
+    console.error("Error downloading Zenodo files:", error.message);
+    return null;
   }
 }
 
-// Function to upload each file to Firestore
+// Extract the files from the /data directory
+async function extractZenodoFiles(zipPath) {
+  try {
+    // Create extraction directory if not exist
+    fs.mkdirSync(extractDir, { recursive: true });
+
+    console.log("Extracting files...");
+    await new Promise((resolve, reject) => {
+      fs.createReadStream(zipPath)
+        .pipe(unzipper.Parse())
+        .on("entry", (entry) => {
+          if (entry.path.includes("/data/") && entry.type === "File") {
+            // Copy to extraction dir
+            const extractPath = path.join(extractDir, path.basename(entry.path));
+            entry.pipe(fs.createWriteStream(extractPath));
+            console.log(`Extracted ${entry.path}`);
+          } else {
+            // Skip
+            entry.autodrain();
+          }
+        })
+        .on("close", resolve)
+        .on("error", reject);
+    });
+    console.log("Finished extracting /data");
+  } catch (error) {
+    console.error("Error extracting Zenodo files:", error.message);
+  }
+}
+
+// Upload the extracted files to Firestore
 async function uploadZenodoFiles() {
   try {
-    // Read all files in the directory
-    const files = fs.readdirSync(targetDir);
+    // Read all files in the extraction directory
+    const files = fs.readdirSync(extractDir);
 
     // Process each file
     for (const file of files) {
-
       // Only process .js files
       if (path.extname(file) === ".js") {
-        const filePath = path.join(targetDir, file);
+        const filePath = path.join(extractDir, file);
 
         // Read and parse the file contents as JSON
         const fileContents = fs.readFileSync(filePath, "utf-8");
@@ -93,9 +111,14 @@ async function uploadZenodoFiles() {
       }
     }
   } catch (error) {
-    console.error("Error uploading data:", error);
+    console.error("Error uploading data:", error.message);
   }
 }
 
-downloadZenodoFiles();
-uploadZenodoFiles();
+(async function main() {
+  const zipPath = await downloadZenodoFiles();
+  if (zipPath) {
+    await extractZenodoFiles(zipPath);
+    await uploadZenodoFiles();
+  }
+})();
