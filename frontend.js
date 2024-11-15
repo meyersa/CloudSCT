@@ -31,7 +31,7 @@ app.get("/get-data-files", async (req, res) => {
   // Check cache first
   const cachedFiles = cache.get("allDataFiles");
   if (cachedFiles) {
-    log("CACHE", "Cache hit for all data files", cachedFiles);
+    log("CACHE", "Cache hit for all data files");
     return res.json(cachedFiles);
   }
   log("CACHE", "Cache miss for all data files");
@@ -44,8 +44,8 @@ app.get("/get-data-files", async (req, res) => {
     }
 
     const files = snapshot.docs.map((doc) => doc.id);
-    cache.set("allDataFiles", files);  // Cache the response
-    log("CACHE", "Data files cached", files);
+    cache.set("allDataFiles", files); // Cache the response
+    log("CACHE", "Data files cached");
     res.json(files);
   } catch (error) {
     log("ERROR", "Error fetching documents from Firestore", { error: error.message });
@@ -66,7 +66,7 @@ app.get("/get-data-file", async (req, res) => {
   // Check cache for the specific file
   const cachedFile = cache.get(filename);
   if (cachedFile) {
-    log("CACHE", `Cache hit for file: ${filename}`, cachedFile);
+    log("CACHE", `Cache hit for file: ${filename}`);
     return res.json(cachedFile);
   }
   log("CACHE", `Cache miss for file: ${filename}`);
@@ -81,8 +81,8 @@ app.get("/get-data-file", async (req, res) => {
     }
 
     const data = doc.data();
-    cache.set(filename, data);  // Cache the response
-    log("CACHE", `Data file cached for filename: ${filename}`, data);
+    cache.set(filename, data); // Cache the response
+    log("CACHE", `Data file cached for filename: ${filename}`);
     res.json(data);
   } catch (error) {
     log("ERROR", "Error fetching document from Firestore", { filename, error: error.message });
