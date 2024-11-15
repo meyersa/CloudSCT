@@ -17,6 +17,7 @@ const db = getFirestore();
 
 const zenodoRecordId = "7670784";
 const downloadUrl = `https://zenodo.org/api/records/${zenodoRecordId}`;
+const INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
 
 const tmpDir = path.join(os.tmpdir(), zenodoRecordId);
 const extractDir = path.join(tmpDir, "extracted");
@@ -115,10 +116,16 @@ async function uploadZenodoFiles() {
   }
 }
 
-(async function main() {
+async function main() {
   const zipPath = await downloadZenodoFiles();
   if (zipPath) {
     await extractZenodoFiles(zipPath);
     await uploadZenodoFiles();
   }
-})();
+};
+
+console.log("Running Zenodo sync task...")
+main() 
+
+console.log(`Starting Zenodo sync on an interval of ${INTERVAL / 1000} seconds.`);
+setInterval(main, INTERVAL);
