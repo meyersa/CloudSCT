@@ -4,13 +4,19 @@ const NodeCache = require("node-cache");
 const app = express();
 const { initializeApp, cert } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
+const dotenv = require("dotenv");
 
-const serviceAccount = require("./auth.json");
+// Load environment variables
+dotenv.config();
 
-// Initialize Firebase
+const firebaseCredentialPath = process.env.FIREBASE_CREDENTIAL_PATH || "./auth.json";
+
+// Initialize Firebase Admin
+const serviceAccount = require(firebaseCredentialPath);
 initializeApp({
   credential: cert(serviceAccount),
 });
+
 const db = getFirestore();
 
 // Initialize node-cache with a TTL of 10 minutes
