@@ -5,6 +5,7 @@
     "firebase-admin": "^13.0.0",
     "fs": "^0.0.1-security",
     "install": "^0.13.0",
+    "node-cache": "^5.1.2",
     "npm": "^10.9.0",
     "path": "^0.12.7",
     "unzipper": "^0.12.3"
