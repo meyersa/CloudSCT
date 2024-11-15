@@ -86,6 +86,10 @@ function createSlider(timestamps) {
     sliderContainer.appendChild(sliderElement);
     sliderContainer.appendChild(timeLabel);
 
+    // Enable interaction with the slider
+    L.DomEvent.disableClickPropagation(sliderContainer);
+    L.DomEvent.disableScrollPropagation(sliderContainer);
+
     return sliderContainer;
   };
 
