@@ -1,0 +1,24 @@
+FROM node:23-alpine
+
+# SIGKILL Fix
+RUN apk add --no-cache tini
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Set the working directory in the container
+WORKDIR /usr/src/app
+
+# Copy package.json and package-lock.json for dependency installation
+COPY package.json package-lock.json ./
+
+# Install dependencies using npm ci
+RUN npm ci
+
+# Copy the rest of the application files
+COPY src ./src
+COPY frontend.js .
+
+# Expose port 3000 for the Express.js app
+EXPOSE 3000
+
+# Define the command to run the application
+CMD ["node", "frontend.js"]

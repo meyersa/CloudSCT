@@ -4,6 +4,8 @@ const path = require("path");
 const os = require("os");
 const unzipper = require("unzipper");
 const dotenv = require("dotenv");
+const { initializeApp, cert } = require("firebase-admin/app");
+const { getFirestore } = require("firebase-admin/firestore");
 
 // Load environment variables
 dotenv.config();
@@ -11,7 +13,7 @@ dotenv.config();
 // Environment variables with defaults
 const zenodoRecordId = process.env.ZENODO_RECORD_ID || "7670784";
 const INTERVAL = parseInt(process.env.INTERVAL, 10) || 86400000; // Default to 24 hours
-const firebaseCredentialPath = process.env.FIREBASE_CREDENTIAL_PATH || "./auth.json";
+const firebaseCredentialPath = process.env.FIREBASE_CREDENTIAL_PATH || "/auth.json";
 
 // Initialize Firebase Admin
 const serviceAccount = require(firebaseCredentialPath);

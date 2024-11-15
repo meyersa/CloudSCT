@@ -9,7 +9,7 @@ const dotenv = require("dotenv");
 // Load environment variables
 dotenv.config();
 
-const firebaseCredentialPath = process.env.FIREBASE_CREDENTIAL_PATH || "./auth.json";
+const firebaseCredentialPath = process.env.FIREBASE_CREDENTIAL_PATH || "/auth.json";
 
 // Initialize Firebase Admin
 const serviceAccount = require(firebaseCredentialPath);
