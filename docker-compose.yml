@@ -3,15 +3,15 @@ services:
   frontend:
     image: ghcr.io/meyersa/cloudsct-frontend
     container_name: cloudsct-frontend
+    env_file:
+      - .env
     ports:
       - "3000:3000"
-    volumes:
-      - ./auth.json:/auth.json
     restart: unless-stopped
 
   backend:
     image: ghcr.io/meyersa/cloudsct-backend
     container_name: cloudsct-backend
-    volumes:
-      - ./auth.json:/auth.json
+    env_file:
+      - .env
     restart: unless-stopped

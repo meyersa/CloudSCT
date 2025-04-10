@@ -1,101 +1,86 @@
 const express = require("express");
 const path = require("path");
 const NodeCache = require("node-cache");
-const app = express();
-const { initializeApp, cert } = require("firebase-admin/app");
-const { getFirestore } = require("firebase-admin/firestore");
+const { MongoClient } = require("mongodb");
 const dotenv = require("dotenv");
 
-// Load environment variables
 dotenv.config();
 
-const firebaseCredentialPath = process.env.FIREBASE_CREDENTIAL_PATH || "/auth.json";
-
-// Initialize Firebase Admin
-const serviceAccount = require(firebaseCredentialPath);
-initializeApp({
-  credential: cert(serviceAccount),
-});
-
-const db = getFirestore();
-
-// Initialize node-cache with a TTL of 10 minutes
+const app = express();
 const cache = new NodeCache({ stdTTL: 600 });
 
-// Logging utility function
-const log = (type, message, data = null) => {
-  const timestamp = new Date().toISOString();
-  console.log(`[${timestamp}] [${type}] ${message}`, data ? `- Data: ${JSON.stringify(data)}` : "");
-};
+const mongoUri = process.env.MONGO_URL;
+const mongoDbName = process.env.MONGO_DB;
+const mongoCollection = process.env.MONGO_COLLECTION || "data";
+
+let db;
+
+async function connectMongo() {
+  const client = new MongoClient(mongoUri);
+  await client.connect();
+  db = client.db(mongoDbName);
+  console.log("Connected to MongoDB");
+}
 
 app.use(express.static(path.join(__dirname, "src")));
 
-// Endpoint to get all data files
 app.get("/get-data-files", async (req, res) => {
-  log("INFO", "Request received for /get-data-files");
+  console.log("Request received for /get-data-files");
 
-  // Check cache first
   const cachedFiles = cache.get("allDataFiles");
   if (cachedFiles) {
-    log("CACHE", "Cache hit for all data files");
+    console.log("Cache hit for all data files");
     return res.json(cachedFiles);
   }
-  log("CACHE", "Cache miss for all data files");
+  console.log("Cache miss for all data files");
 
   try {
-    const snapshot = await db.collection("data").get();
-    if (snapshot.empty) {
-      log("WARNING", "No data found in Firestore for all data files");
-      return res.status(404).json({ message: "No data found in Firestore" });
-    }
-
-    const files = snapshot.docs.map((doc) => doc.id);
-    cache.set("allDataFiles", files); // Cache the response
-    log("CACHE", "Data files cached");
-    res.json(files);
+    const files = await db.collection(mongoCollection).find({}, { projection: { _id: 1 } }).toArray();
+    const fileNames = files.map((doc) => doc._id);
+    cache.set("allDataFiles", fileNames);
+    console.log("Data files cached");
+    res.json(fileNames);
   } catch (error) {
-    log("ERROR", "Error fetching documents from Firestore", { error: error.message });
-    res.status(500).send("Error fetching data from Firestore");
+    console.error("Error fetching documents from MongoDB:", error.message);
+    res.status(500).send("Error fetching data from MongoDB");
   }
 });
 
-// Endpoint to get a single data file by filename
 app.get("/get-data-file", async (req, res) => {
   const { filename } = req.query;
-  log("INFO", "Request received for /get-data-file", { filename });
+  console.log("Request received for /get-data-file", filename);
 
   if (!filename) {
-    log("ERROR", "Filename parameter is missing in request");
+    console.error("Filename parameter is missing in request");
     return res.status(400).send("Filename parameter is required");
   }
 
-  // Check cache for the specific file
   const cachedFile = cache.get(filename);
   if (cachedFile) {
-    log("CACHE", `Cache hit for file: ${filename}`);
+    console.log(`Cache hit for file: ${filename}`);
     return res.json(cachedFile);
   }
-  log("CACHE", `Cache miss for file: ${filename}`);
+  console.log(`Cache miss for file: ${filename}`);
 
   try {
-    const docRef = db.collection("data").doc(filename);
-    const doc = await docRef.get();
-
-    if (!doc.exists) {
-      log("WARNING", `File not found in Firestore: ${filename}`);
-      return res.status(404).send("File not found in Firestore");
+    const doc = await db.collection(mongoCollection).findOne({ _id: filename });
+    if (!doc) {
+      console.warn(`File not found in MongoDB: ${filename}`);
+      return res.status(404).send("File not found in MongoDB");
     }
 
-    const data = doc.data();
-    cache.set(filename, data); // Cache the response
-    log("CACHE", `Data file cached for filename: ${filename}`);
-    res.json(data);
+    delete doc._id;
+    cache.set(filename, doc);
+    console.log(`Data file cached for filename: ${filename}`);
+    res.json(doc);
   } catch (error) {
-    log("ERROR", "Error fetching document from Firestore", { filename, error: error.message });
-    res.status(500).send("Error fetching data from Firestore");
+    console.error("Error fetching document from MongoDB:", error.message);
+    res.status(500).send("Error fetching data from MongoDB");
   }
 });
 
-app.listen(3000, () => {
-  log("INFO", "Server running on port 3000");
+connectMongo().then(() => {
+  app.listen(3000, () => {
+    console.log("Server running on port 3000");
+  });
 });
